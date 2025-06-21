@@ -10,8 +10,6 @@ class TrainResponse(BaseModel):
 class VerifyResponse(BaseModel):
     match_score: float
 
-print("voice.py 불러짐")
-
 @router.post("/train", response_model=TrainResponse)
 async def train_voice(file: UploadFile = File(...)):
     try :
@@ -23,7 +21,6 @@ async def train_voice(file: UploadFile = File(...)):
 
 @router.post("/verify", response_model=VerifyResponse)
 async def verify_voice(file: UploadFile = File(...)):
-    print("라우터 등록됨")
     try:
         result = await compare_embedding(file)
         return {"match_score": result}
