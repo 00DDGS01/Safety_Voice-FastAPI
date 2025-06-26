@@ -1,5 +1,6 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi import APIRouter, UploadFile, File, HTTPException, Header, Depends
 from app.services.voice_service import process_and_store_embedding, compare_embedding
+from app.services.notify_spring import notify_spring_voice_trained
 from pydantic import BaseModel
 
 router = APIRouter(prefix="/voice", tags=["Voice Recoginition"])
@@ -10,10 +11,20 @@ class TrainResponse(BaseModel):
 class VerifyResponse(BaseModel):
     match_score: float
 
+# JWT 추출 함수
+async def get_jwt_token(authorization: str = Header(...)):
+    if not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Invalid Authorization header")
+    return authorization.replace("Bearer ", "")
+
 @router.post("/train", response_model=TrainResponse)
-async def train_voice(file: UploadFile = File(...)):
+async def train_voice(
+    file: UploadFile = File(...),
+    user_jwt: str = Depends(get_jwt_token)
+):
     try :
         await process_and_store_embedding(file)
+        await notify_spring_voice_trained(user_jwt)
         return {"message": "음성 학습 및 임베딩 저장 완료"}
     except Exception as e :
         raise HTTPException(status_code=500, detail={"error": str(e)})
