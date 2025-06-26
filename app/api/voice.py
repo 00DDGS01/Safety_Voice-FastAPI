@@ -1,6 +1,7 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException, Header, Depends
 from app.services.voice_service import process_and_store_embedding, compare_embedding
 from app.services.notify_spring import notify_spring_voice_trained
+from app.utils.jwt_util import extract_user_id_from_jwt
 from pydantic import BaseModel
 
 router = APIRouter(prefix="/voice", tags=["Voice Recoginition"])
@@ -23,7 +24,8 @@ async def train_voice(
     user_jwt: str = Depends(get_jwt_token)
 ):
     try :
-        await process_and_store_embedding(file)
+        user_id = extract_user_id_from_jwt(user_jwt)
+        await process_and_store_embedding(file, user_id)
         await notify_spring_voice_trained(user_jwt)
         return {"message": "음성 학습 및 임베딩 저장 완료"}
     except Exception as e :
