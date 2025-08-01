@@ -14,6 +14,7 @@ class VerifyResponse(BaseModel):
 
 # JWT 추출 함수
 async def get_jwt_token(authorization: str = Header(...)):
+    print("Authorization header:", authorization)  
     if not authorization.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="Invalid Authorization header")
     return authorization.replace("Bearer ", "")
@@ -23,6 +24,7 @@ async def train_voice(
     file: UploadFile = File(...),
     user_jwt: str = Depends(get_jwt_token)
 ):
+    print(f"[train_voice] file: {file.filename}")
     try :
         user_id = extract_user_id_from_jwt(user_jwt)
         await process_and_store_embedding(file, user_id)

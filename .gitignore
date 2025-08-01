@@ -1,1 +1,16 @@
-.env
+# Python
+__pycache__/
+*.pyc
+
+# Virtual environment
+venv/
+.env/
+
+# Mac OS
+.DS_Store
+
+# 음성 임베딩 파일
+embeddings/*.npy
+
+# 음성 샘플 파일
+voice_samples/*.wav
